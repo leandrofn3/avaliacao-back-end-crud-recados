@@ -4,6 +4,10 @@ const app = express();
 
 app.use(express.json());
 
+function middleware(request, response, next){
+    
+};
+
 app.get("/", (request, response) => {
     return response.json("ok")
 });
@@ -23,12 +27,12 @@ app.post("/recados", (request, response) => {
     response.status(201).json();
 });
 
-//READE-ler
+//READE-ler.
 app.get("/recados", (request, response) => {
     response.status(200).json(recados);
 });
 
-//READE - ler um recado só
+//READE - ler um recado só.
 app.get("/recados/:id", (request, response) => {
     const id = Number(request.params.id);
     const recado = recados.find(recadoId => recadoId.id === id);
@@ -36,6 +40,7 @@ app.get("/recados/:id", (request, response) => {
     //console.log(recado)
 });
 
+//UPDATE - alterar um recado.
 app.put("/recados/:id", (request, response) => {
     const recado = request.body;
     const id = Number(request.params.id);
@@ -46,6 +51,15 @@ app.put("/recados/:id", (request, response) => {
         descricao: recado.descricao
     }
     response.status(201).json();
+});
+
+//DELETE - deletar um recado
+
+app.delete("/recados/:id", (request, response)=> {
+    const id = Number(request.params.id);
+    const indexRecado = recados.findIndex(recadoId => recadoId.id === id);
+    recados.splice(indexRecado, 1);
+    response.status(200).json();
 });
 
 app.listen(3001, () => { console.log("servidor iniciado!") })
