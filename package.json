@@ -1,0 +1,15 @@
+{
+  "name": "avaliacao-beck-end-crud-recados",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemon": "^2.0.22",
+    "sucrase": "^3.32.0"
+  }
+}
