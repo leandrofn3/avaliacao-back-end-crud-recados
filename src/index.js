@@ -1,6 +1,5 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import session from 'express-session';
 
 const app = express();
 
@@ -24,29 +23,37 @@ app.get("/", (request, response) => {
 
 let users = [];
 
-app.get("/signup", (request, response) => {
-    response.render("signup");
-})
 app.post("/signup", middlewareValidationSignup, (request, response) => {
     const user = request.body;
-    users.push({
-        id: Math.floor(Math.random() * 123456),
-        name: user.nome,
-        email: user.email,
-        password: user.password,
-        recados: recados = []
-    });
+    const saltRounds = 10;
+
+    bcrypt.hash(user.password, saltRounds, function (err, hash) {
+        if (hash) {
+            users.push({
+                id: Math.floor(Math.random() * 123456),
+                name: user.name,
+                email: user.email,
+                password: hash,
+                recados: recados = []
+            });
+        } else {
+            return response.status(400).json(`Houve um erro: ${err}`)
+        }
+    }); console.log(users)
+
     response.status(201).json("Conta criada com sucesso");
 });
 
 app.get("/signup", (request, response) => {
-    response.status(200).json();
-})
+    response.status(200).json(users);
+});
+
 
 function middlewareValidationSignup(request, response, next) {
     const sameEmail = users.some((emailSame) => {
         return emailSame.email === request.body.email
     });
+
     if (sameEmail) {
         return response.status(422).json("Email já existe, tente outro!")
     } else if (!request.body.name) {
@@ -56,10 +63,36 @@ function middlewareValidationSignup(request, response, next) {
     } else if (!request.body.password) {
         return response.status(422).json("A senha é obrigatória! ")
     } else {
-        next()
-    };
+        next();
+    }
 };
 
+//LOGIN
+
+app.post('/login', async (request, response) => {
+    const { email, password } = request.body;
+
+    if (!email) {
+        return response.status(422).json({ message: 'O email é obrigatório!' });
+    }
+
+    if (!password) {
+        return response.status(422).json({ message: 'A senha é obrigatória!' });
+    };
+
+    const user = users.find(user => user.email === email);
+
+    if (!user) {
+        return response.status(402).json({ message: 'Usuário não encontrado!' });
+    }
+
+    const checkPassword = await bcrypt.compare(password, user.password);
+
+    if (!checkPassword) {
+        return response.status(422).json({ message: 'Senha inválida!' });
+    }
+    
+});
 //CRUD RECADOS
 //CREATE
 
@@ -78,9 +111,9 @@ app.post("/recados", (request, response) => {
 
 //READE-ler.
 
-app.get("/recados", (request, response) => {
-    response.status(200).json(recados);
-});
+// app.get("/recados", (request, response) => {
+//     response.status(200).json(recados);
+// });
 
 //READE - ler um recado só.
 
@@ -114,4 +147,4 @@ app.delete("/recados/:id", middlewareId, (request, response) => {
     response.status(200).json();
 });
 
-app.listen(3001, () => { console.log("servidor iniciado!") })
+app.listen(3001, () => { console.log("servidor iniciado!") });
